@@ -52,7 +52,10 @@
     - [order](#order)
   - [196. How to Manage the Keyboard and use the Swift Package Manager](#196-how-to-manage-the-keyboard-and-use-the-swift-package-manager)
   - [197. Finishing Touches: UI and UX Improvements](#197-finishing-touches-ui-and-ux-improvements)
-    - [첫 번째](#첫-번째)
+    - [첫 번째: Sender, Recipient 구분](#첫-번째-sender-recipient-구분)
+    - [두 번째: Auto Scroll](#두-번째-auto-scroll)
+    - [세 번째: Nav bar 커스터마이징](#세-번째-nav-bar-커스터마이징)
+    - [TODO](#todo)
   - [198. The ViewController Lifecycle Explained](#198-the-viewcontroller-lifecycle-explained)
   - [199. The App Lifecycle Methods Explained](#199-the-app-lifecycle-methods-explained)
   - [200. Download the Completed App Project](#200-download-the-completed-app-project)
@@ -676,7 +679,64 @@ return UTC Timestamp : TimeInterval = Double
    - of logout and title text
 5. Welcome View에서는 hide nav bar
 
-### 첫 번째
+### 첫 번째: Sender, Recipient 구분
+
+- idea
+  - datasource protocol의 tableView method에서 sender가 user와 같다면 me, Recipient가 user와 같다면 you
+- 방법
+    1. 2개의 cell 만들기
+    2. 1개의 cell을 활용하기 v
+       1. xib에 2개의 image view를 만든 후, 필요에 따라 하나를 숨긴다.
+       2. assistant에서 left image view 연결 후,
+       3. chatViewController에서 숨기기
+
+### 두 번째: Auto Scroll
+
+- idea
+  - snapshotListener 안에서 scroll 하자
+- 방법
+  - indexPath 생성하기
+    - row
+      - 마지막 index: messages.count - 1
+    - section
+      - ios 설정을 보면 section이 나뉘어진 것을 확인할 수 있다.
+      - 현재 앱에서는 나뉘어져 있지 않으므로 0(첫 섹션)
+  - `self.tableView.scrollToRow(at:, at:, animated:)`
+
+- message send 후 text input field 초기화하기
+  - sendPressed method 안에 로직 추가
+    - UI 변경이므로 + background closure 안에서 실행하므로 업뎃 코드는
+    - Dispatchqueue.main.async 안에 넣자.
+
+### 세 번째: Nav bar 커스터마이징
+
+- idea:
+  - chat view nav bar 변경
+    - 배경 색 바꾸기
+    - 타이틀 폰트 바꾸기
+
+- 방법
+  1. 배경 색 바꾸기
+     - main.storyboard > Navigation Controller Scene 에서 변경
+       - Bar Tint
+         - nav bar background color
+       - Translucent unchecked
+         - nav bar background color가 실제 view background color와 동일하게 되도록...
+       - Tint
+         - Back button text color
+  2. 일부 view 에서 nav bar 안보이게 하기
+     - Welcome view controller 에서
+       - viewWillAppear
+         - hide nav
+       - viewWillDisappear
+         - show nav
+     - VC의 LifeCycle
+
+### TODO
+
+- 왜 bar tint가 안먹을까..?
+  - [ ] 해결해보기
+  - [참고](https://developer.apple.com/forums/thread/682420)
 
 ## 198. The ViewController Lifecycle Explained
 

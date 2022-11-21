@@ -52,8 +52,9 @@ class ChatViewController: UIViewController {
                             
                             DispatchQueue.main.async {
                                 self.tableView.reloadData()
-                            }
-                            
+                                let indexPath = IndexPath(row: self.messages.count - 1, section: 0)
+                                self.tableView.scrollToRow(at: indexPath, at: .top, animated: true)
+                            }   
                         }
                     }
                 }
@@ -62,7 +63,6 @@ class ChatViewController: UIViewController {
     }
     
     @IBAction func sendPressed(_ sender: UIButton) {
-
         if let messageBody = messageTextfield.text,
            let messageSender = Auth.auth().currentUser?.email {
             db.collection(K.FStore.collectionName).addDocument(data: [
@@ -75,9 +75,10 @@ class ChatViewController: UIViewController {
                     print("Error adding document: \(e)")
                 } else {
                     print("Successfully saved data.")
-//                    print("Document added with ID: \(ref!.documentID)")
+                    DispatchQueue.main.async {
+                        self.messageTextfield.text = ""
+                    }
                 }
-                
             }
         }
         
@@ -88,12 +89,10 @@ class ChatViewController: UIViewController {
         do {
             try Auth.auth().signOut()
             navigationController?.popToRootViewController(animated: true)
-//            self.performSegue(withIdentifier: "ChatToWelcome", sender: self)
         } catch let signOutError as NSError {
             print("Error signing out: %@", signOutError)
         }
     }
-    
 }
 
 extension ChatViewController: UITableViewDataSource {
@@ -104,9 +103,22 @@ extension ChatViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // 여기서 cell을 만들고 table view cell을 return해야 함.
+        let message = messages[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: K.cellIdentifier, for: indexPath) as! MessageCell
-        // cell 데이터 추가하기
-        cell.label.text = messages[indexPath.row].body
+        
+        if message.sender == Auth.auth().currentUser?.email {
+            // This is a message from the current user.
+            cell.leftImageView.isHidden = true
+            cell.rightImageView.isHidden = false
+            cell.messageBubble.backgroundColor = UIColor(named: K.BrandColors.lightPurple)
+            cell.label.textColor = UIColor(named: K.BrandColors.purple)
+        } else {
+            // This is a message from another user.
+            cell.rightImageView.isHidden = true
+            cell.leftImageView.isHidden = false
+        }
+        cell.label.text = message.body
         return cell
     }
 }
+
